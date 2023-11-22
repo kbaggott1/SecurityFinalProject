@@ -115,7 +115,7 @@ def rsa_encryption(text, mode='encrypt'):
 
 # Main Function
 def main():
-    choice = input("Choose encryption method (Caesar, RSA): ").lower()
+    choice = input("Choose encryption method (Caesar, RSA, DES, CAST5, ChaCha20, TwoFish, DSA): ").lower()
 
     if(choice == 'dsa'):
         mode = input("Choose mode (sign/verify): ").lower()
