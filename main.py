@@ -1,13 +1,23 @@
-from cryptography.fernet import Fernet
-from Crypto.Cipher import DES, AES
 from Crypto.PublicKey import RSA
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
 import base64
-from des import DESEncryptor
+from des_encryptor import DESEncryptor
 from twofish_encryptor import TwofishEncryptor
 from key_generator import KeyGenerator
-from chacha20 import ChaCha20Encryptor
+from chacha20_encryptor import ChaCha20Encryptor
+from cast_encryptor import CASTEncryptor
+
+#CAST
+def cast_encryption(text, mode='encrypt'):
+    if mode == 'encrypt':
+        key = KeyGenerator.generate_key(128)
+        print("Generated key: " + base64.b64encode(key).decode())
+        cast = CASTEncryptor(key)
+        return cast.encrypt(text)
+    
+    elif mode == 'decrypt':
+        key = base64.b64decode(input("Please enter key to decrypt: ").encode())
+        cast = CASTEncryptor(key)
+        return cast.decrypt(text)
 
 #ChaCha20
 def chacha20_encryption(text, mode='encrypt'):
@@ -99,6 +109,8 @@ def main():
         result = twofish_encryption(text, mode)
     elif choice == 'chacha20':
         result = chacha20_encryption(text, mode)
+    elif choice == 'cast':
+        result = cast_encryption(text, mode)
     
     print(f"Result: {result}")
 
