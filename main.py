@@ -1,10 +1,31 @@
 from Crypto.PublicKey import RSA
 import base64
-from des_encryptor import DESEncryptor
-from twofish_encryptor import TwofishEncryptor
+from symmetric_algorithms.des_encryptor import DESEncryptor
+from symmetric_algorithms.twofish_encryptor import TwofishEncryptor
+from symmetric_algorithms.chacha20_encryptor import ChaCha20Encryptor
+from symmetric_algorithms.cast_encryptor import CASTEncryptor
+from asymmetric_algorithms.dsa_cryptor import DSACryptor
 from key_generator import KeyGenerator
-from chacha20_encryptor import ChaCha20Encryptor
-from cast_encryptor import CASTEncryptor
+#DSA
+def dsa_signing(text, mode='sign'):
+    if mode == 'sign':
+        private_key, public_key = DSACryptor.generate_key_pair()
+
+        #print("Generated private key: " + private_key)
+        print("Generated public key: " + public_key)
+
+        signature = DSACryptor.sign_text(text, private_key)
+
+        return "Signature: " + base64.b64encode(signature).decode('utf-8')
+    
+    elif mode == 'verify':
+        public_key = input("Please enter key public key: ")
+        signature = base64.b64decode(input("Please enter signature: ").encode('utf-8'))
+        
+        if DSACryptor.verify_text(text, signature, public_key):
+            return "Text is valid and untampered."
+        else:
+            return "Text is invalid and may be tampered with."
 
 #CAST
 def cast_encryption(text, mode='encrypt'):
@@ -95,7 +116,12 @@ def rsa_encryption(text, mode='encrypt'):
 # Main Function
 def main():
     choice = input("Choose encryption method (Caesar, RSA): ").lower()
-    mode = input("Choose mode (encrypt/decrypt): ").lower()
+
+    if(choice == 'dsa'):
+        mode = input("Choose mode (sign/verify): ").lower()
+    else:
+        mode = input("Choose mode (encrypt/decrypt): ").lower()
+
     text = input("Enter text: ")
 
     if choice == 'caesar':
@@ -111,6 +137,8 @@ def main():
         result = chacha20_encryption(text, mode)
     elif choice == 'cast':
         result = cast_encryption(text, mode)
+    elif choice == 'dsa':
+        result = dsa_signing(text, mode)
     
     print(f"Result: {result}")
 
