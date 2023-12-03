@@ -9,10 +9,11 @@ except ModuleNotFoundError:
 from symmetric_algorithms.chacha20_encryptor import ChaCha20Encryptor
 from symmetric_algorithms.cast_encryptor import CASTEncryptor
 from asymmetric_algorithms.dsa_cryptor import DSACryptor
+from asymmetric_algorithms.ecc_cryptor import ECCCryptor
 from asymmetric_algorithms.rsa_encryptor import RSAEncryptor
 from symmetric_algorithms.caesar_encryptor import CaesarEncryptor
 from key_generator import KeyGenerator
-import os
+import base64
 import rsa
 
 #DSA
@@ -35,6 +36,24 @@ def dsa_signing(text, mode='sign'):
             return "Text is valid and untampered."
         else:
             return "Text is invalid and may be tampered with."
+
+# ECC
+def ecc_operations(text, mode='sign'):
+    if mode == 'sign':
+        private_key, public_key = ECCCryptor.generate_key_pair()
+        print("Generated public key: " + public_key)
+        signature = ECCCryptor.sign_text(text, private_key)
+        return "Signature: " + base64.b64encode(signature).decode('utf-8')
+    
+    elif mode == 'verify':
+        public_key = input("Please enter the public key: ")
+        signature = base64.b64decode(input("Please enter the signature: ").encode('utf-8'))
+        
+        if ECCCryptor.verify_text(text, signature, public_key):
+            return "Text is valid and untampered."
+        else:
+            return "Text is invalid and may be tampered with."
+
 
 #CAST
 def cast_encryption(text, mode='encrypt'):
@@ -148,7 +167,7 @@ def load_key_from_file():
 def main():
     choice = input("Choose encryption method (Caesar, RSA, DES, AES, Camellia, CAST5, ChaCha20, TwoFish, DSA): ").lower()
 
-    if(choice == 'dsa'):
+    if(choice == 'dsa' or choice == 'ecc'):
         mode = input("Choose mode (sign/verify): ").lower()
     else:
         mode = input("Choose mode (encrypt/decrypt): ").lower()
@@ -174,6 +193,8 @@ def main():
         result = cast_encryption(text, mode)
     elif choice == 'dsa':
         result = dsa_signing(text, mode)
+    elif choice == 'ecc':
+        result = ecc_operations(text, mode)
     
     print(f"Result: {result}")
 
