@@ -1,3 +1,5 @@
 pycryptodome
 cryptography
 twofish
+cffi
+python-camellia
