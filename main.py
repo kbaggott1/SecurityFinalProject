@@ -1,7 +1,7 @@
 #Imports
 from symmetric_algorithms.des_encryptor import DESEncryptor
 from symmetric_algorithms.aes_encryptor import AESEncryptor
-from symmetric_algorithms.camellia_encryptor import CamelliaEncryptor
+from symmetric_algorithms.blowfish_encryptor import BlowfishEncryptor
 try:
     from symmetric_algorithms.twofish_encryptor import TwofishEncryptor
 except ModuleNotFoundError:
@@ -121,18 +121,18 @@ def aes_encryption(text, mode='encrypt'):
         aes = AESEncryptor(key)
         return aes.decrypt(text)
 
-#Camellia
-def camellia_encryption(text, mode='encrypt'):
+# Blowfish
+def blowfish_encryption(text, mode='encrypt'):
     if mode == 'encrypt':
-        key = KeyGenerator.generate_key(256)
+        key = BlowfishEncryptor.generate_key(128)
         print("Generated key: " + base64.b64encode(key).decode())
-        camellia = CamelliaEncryptor(key)
-        return camellia.encrypt(text)
+        blowfish = BlowfishEncryptor(key)
+        return blowfish.encrypt(text)
     
     elif mode == 'decrypt':
         key = base64.b64decode(input("Please enter key to decrypt: ").encode())
-        camellia = CamelliaEncryptor(key)
-        return camellia.decrypt(text)
+        blowfish = BlowfishEncryptor(key)
+        return blowfish.decrypt(text)
     
 # Caesar Cipher
 def caesar_cipher(text, shift, mode='encrypt'):
@@ -165,7 +165,7 @@ def load_key_from_file():
 
 # Main Function
 def main():
-    choice = input("Choose encryption method (Caesar, RSA, DES, AES, Camellia, CAST5, ChaCha20, TwoFish, DSA): ").lower()
+    choice = input("Choose encryption method (Caesar, RSA, DES, AES, Blowfish, CAST5, ChaCha20, TwoFish, DSA): ").lower()
 
     if(choice == 'dsa' or choice == 'ecc'):
         mode = input("Choose mode (sign/verify): ").lower()
@@ -183,8 +183,8 @@ def main():
         result = des_encryption(text, mode)
     elif choice == 'aes':
         result = aes_encryption(text, mode)
-    elif choice == 'camellia':
-        result = camellia_encryption(text, mode)
+    elif choice == 'blowfish':
+        result = blowfish_encryption(text, mode)
     elif choice == 'twofish':
         result = twofish_encryption(text, mode)
     elif choice == 'chacha20':
