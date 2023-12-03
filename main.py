@@ -1,6 +1,8 @@
+#Imports
 from Crypto.PublicKey import RSA
 import base64
 from symmetric_algorithms.des_encryptor import DESEncryptor
+from symmetric_algorithms.aes_encryptor import AESEncryptor
 try:
     from symmetric_algorithms.twofish_encryptor import TwofishEncryptor
 except ModuleNotFoundError:
@@ -10,6 +12,7 @@ from symmetric_algorithms.cast_encryptor import CASTEncryptor
 from asymmetric_algorithms.dsa_cryptor import DSACryptor
 from symmetric_algorithms.caesar_encryptor import CaesarEncryptor
 from key_generator import KeyGenerator
+
 #DSA
 def dsa_signing(text, mode='sign'):
     if mode == 'sign':
@@ -84,6 +87,18 @@ def des_encryption(text, mode='encrypt'):
         des = DESEncryptor(key)
         return des.decrypt(text)
 
+#AES
+def aes_encryption(text, mode='encrypt'):
+    if mode == 'encrypt':
+        key = KeyGenerator.generate_key(256)
+        print("Generated key: " + base64.b64encode(key).decode())
+        aes = AESEncryptor(key)
+        return aes.encrypt(text)
+    
+    elif mode == 'decrypt':
+        key = base64.b64decode(input("Please enter key to decrypt: ").encode())
+        aes = AESEncryptor(key)
+        return aes.decrypt(text)
 
 # Caesar Cipher
 def caesar_cipher(text, shift, mode='encrypt'):
@@ -110,7 +125,7 @@ def rsa_encryption(text, mode='encrypt'):
 
 # Main Function
 def main():
-    choice = input("Choose encryption method (Caesar, RSA, DES, CAST5, ChaCha20, TwoFish, DSA): ").lower()
+    choice = input("Choose encryption method (Caesar, RSA, DES, AES, CAST5, ChaCha20, TwoFish, DSA): ").lower()
 
     if(choice == 'dsa'):
         mode = input("Choose mode (sign/verify): ").lower()
@@ -126,6 +141,8 @@ def main():
         result = rsa_encryption(text, mode)
     elif choice == 'des':
         result = des_encryption(text, mode)
+    elif choice == 'aes':
+        result = aes_encryption(text, mode)
     elif choice == 'twofish':
         result = twofish_encryption(text, mode)
     elif choice == 'chacha20':
