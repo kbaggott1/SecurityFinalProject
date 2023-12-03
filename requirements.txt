@@ -3,3 +3,4 @@ cryptography
 twofish
 cffi
 python-camellia
+rsa

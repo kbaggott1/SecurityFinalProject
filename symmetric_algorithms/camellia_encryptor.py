@@ -1,4 +1,7 @@
-import camellia
+try:
+    import camellia
+except:
+    print("Camellia module not found. Please install it using 'pip install python-camellia'")
 import os
 
 

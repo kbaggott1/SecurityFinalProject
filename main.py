@@ -1,6 +1,4 @@
 #Imports
-from Crypto.PublicKey import RSA
-import base64
 from symmetric_algorithms.des_encryptor import DESEncryptor
 from symmetric_algorithms.aes_encryptor import AESEncryptor
 from symmetric_algorithms.camellia_encryptor import CamelliaEncryptor
@@ -11,8 +9,11 @@ except ModuleNotFoundError:
 from symmetric_algorithms.chacha20_encryptor import ChaCha20Encryptor
 from symmetric_algorithms.cast_encryptor import CASTEncryptor
 from asymmetric_algorithms.dsa_cryptor import DSACryptor
+from asymmetric_algorithms.rsa_encryptor import RSAEncryptor
 from symmetric_algorithms.caesar_encryptor import CaesarEncryptor
 from key_generator import KeyGenerator
+import os
+import rsa
 
 #DSA
 def dsa_signing(text, mode='sign'):
@@ -113,6 +114,7 @@ def camellia_encryption(text, mode='encrypt'):
         key = base64.b64decode(input("Please enter key to decrypt: ").encode())
         camellia = CamelliaEncryptor(key)
         return camellia.decrypt(text)
+    
 # Caesar Cipher
 def caesar_cipher(text, shift, mode='encrypt'):
     ce = CaesarEncryptor()
@@ -121,20 +123,26 @@ def caesar_cipher(text, shift, mode='encrypt'):
     elif mode == 'decrypt':
         return ce.decrypt(text, shift)
 
-# RSA Encryption/Decryption
+# RSA
 def rsa_encryption(text, mode='encrypt'):
-    key = RSA.generate(2048)
-    private_key = key.export_key()
-    public_key = key.publickey().export_key()
-
     if mode == 'encrypt':
-        encryptor = RSA.import_key(public_key)
-        encrypted = encryptor.encrypt(text.encode())
-        return base64.b64encode(encrypted).decode()
+        public_key, private_key = RSAEncryptor.generate_key_pair()
+        print("Generated private key in secrets file.")
+        save_key_to_file(private_key)
+        return RSAEncryptor.encrypt(text, public_key)
     elif mode == 'decrypt':
-        decryptor = RSA.import_key(private_key)
-        decrypted = decryptor.decrypt(base64.b64decode(text))
-        return decrypted.decode()
+        private_key = load_key_from_file()
+        plaintext = RSAEncryptor.decrypt(text, private_key)
+        return plaintext
+
+# RSA Helper functions
+def save_key_to_file(key):
+    with open("secrets", 'wb') as f:
+        f.write(key.save_pkcs1('PEM'))
+
+def load_key_from_file():
+    with open("secrets", 'rb') as f:
+        return rsa.PrivateKey.load_pkcs1(f.read(), format='PEM')
 
 # Main Function
 def main():
