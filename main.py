@@ -1,10 +1,14 @@
 from Crypto.PublicKey import RSA
 import base64
 from symmetric_algorithms.des_encryptor import DESEncryptor
-from symmetric_algorithms.twofish_encryptor import TwofishEncryptor
+try:
+    from symmetric_algorithms.twofish_encryptor import TwofishEncryptor
+except ModuleNotFoundError:
+    print("Twofish module not found. Please install it using 'pip install twofish'")
 from symmetric_algorithms.chacha20_encryptor import ChaCha20Encryptor
 from symmetric_algorithms.cast_encryptor import CASTEncryptor
 from asymmetric_algorithms.dsa_cryptor import DSACryptor
+from symmetric_algorithms.caesar_encryptor import CaesarEncryptor
 from key_generator import KeyGenerator
 #DSA
 def dsa_signing(text, mode='sign'):
@@ -83,20 +87,11 @@ def des_encryption(text, mode='encrypt'):
 
 # Caesar Cipher
 def caesar_cipher(text, shift, mode='encrypt'):
-    result = ""
-    for i in range(len(text)):
-        char = text[i]
-        if mode == 'encrypt':
-            if char.isupper():
-                result += chr((ord(char) + shift - 65) % 26 + 65)
-            else:
-                result += chr((ord(char) + shift - 97) % 26 + 97)
-        elif mode == 'decrypt':
-            if char.isupper():
-                result += chr((ord(char) - shift - 65) % 26 + 65)
-            else:
-                result += chr((ord(char) - shift - 97) % 26 + 97)
-    return result
+    ce = CaesarEncryptor()
+    if mode == 'encrypt':
+        return ce.encrypt(text, shift)
+    elif mode == 'decrypt':
+        return ce.decrypt(text, shift)
 
 # RSA Encryption/Decryption
 def rsa_encryption(text, mode='encrypt'):

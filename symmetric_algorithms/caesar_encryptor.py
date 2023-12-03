@@ -4,7 +4,7 @@
 Caesar Cipher encrypts and decrypts by shifting each character of the message
 by a certain number of letters back or forth
 '''
-class CaeserEncryptor:
+class CaesarEncryptor:
 	
 		def __init__(self):
 				pass
@@ -25,7 +25,10 @@ class CaeserEncryptor:
 				else:
 					shift = shift % 26
 				for character in text:
+					if character.isalpha():
 						result += chr(ord(character)+shift)
+					else:
+						result += character
 				return result
 
 		'''
@@ -43,13 +46,16 @@ class CaeserEncryptor:
 					else:
 						shift = shift % 26
 					for character in text:
-						result += chr(ord(character)-shift)
+						if character.isalpha():
+							result += chr(ord(character)-shift)
+						else:
+							result += character
 					return result
 
 
 #For testing
 if __name__ == "__main__":
-	ce = CaeserEncryptor()
+	ce = CaesarEncryptor()
 	encryptedText = ce.encrypt("Hello", -1)
 	print(encryptedText)
 	decryptedText = ce.decrypt(encryptedText, -1)
