@@ -1,11 +1,21 @@
-from Crypto.PublicKey import RSA
-import base64
+#Imports
 from symmetric_algorithms.des_encryptor import DESEncryptor
-from symmetric_algorithms.twofish_encryptor import TwofishEncryptor
+from symmetric_algorithms.aes_encryptor import AESEncryptor
+from symmetric_algorithms.camellia_encryptor import CamelliaEncryptor
+try:
+    from symmetric_algorithms.twofish_encryptor import TwofishEncryptor
+except ModuleNotFoundError:
+    print("Twofish module not found. Please install it using 'pip install twofish'")
 from symmetric_algorithms.chacha20_encryptor import ChaCha20Encryptor
 from symmetric_algorithms.cast_encryptor import CASTEncryptor
 from asymmetric_algorithms.dsa_cryptor import DSACryptor
+from asymmetric_algorithms.ecc_cryptor import ECCCryptor
+from asymmetric_algorithms.rsa_encryptor import RSAEncryptor
+from symmetric_algorithms.caesar_encryptor import CaesarEncryptor
 from key_generator import KeyGenerator
+import base64
+import rsa
+
 #DSA
 def dsa_signing(text, mode='sign'):
     if mode == 'sign':
@@ -26,6 +36,24 @@ def dsa_signing(text, mode='sign'):
             return "Text is valid and untampered."
         else:
             return "Text is invalid and may be tampered with."
+
+# ECC
+def ecc_operations(text, mode='sign'):
+    if mode == 'sign':
+        private_key, public_key = ECCCryptor.generate_key_pair()
+        print("Generated public key: " + public_key)
+        signature = ECCCryptor.sign_text(text, private_key)
+        return "Signature: " + base64.b64encode(signature).decode('utf-8')
+    
+    elif mode == 'verify':
+        public_key = input("Please enter the public key: ")
+        signature = base64.b64decode(input("Please enter the signature: ").encode('utf-8'))
+        
+        if ECCCryptor.verify_text(text, signature, public_key):
+            return "Text is valid and untampered."
+        else:
+            return "Text is invalid and may be tampered with."
+
 
 #CAST
 def cast_encryption(text, mode='encrypt'):
@@ -80,44 +108,66 @@ def des_encryption(text, mode='encrypt'):
         des = DESEncryptor(key)
         return des.decrypt(text)
 
+#AES
+def aes_encryption(text, mode='encrypt'):
+    if mode == 'encrypt':
+        key = KeyGenerator.generate_key(256)
+        print("Generated key: " + base64.b64encode(key).decode())
+        aes = AESEncryptor(key)
+        return aes.encrypt(text)
+    
+    elif mode == 'decrypt':
+        key = base64.b64decode(input("Please enter key to decrypt: ").encode())
+        aes = AESEncryptor(key)
+        return aes.decrypt(text)
 
+#Camellia
+def camellia_encryption(text, mode='encrypt'):
+    if mode == 'encrypt':
+        key = KeyGenerator.generate_key(256)
+        print("Generated key: " + base64.b64encode(key).decode())
+        camellia = CamelliaEncryptor(key)
+        return camellia.encrypt(text)
+    
+    elif mode == 'decrypt':
+        key = base64.b64decode(input("Please enter key to decrypt: ").encode())
+        camellia = CamelliaEncryptor(key)
+        return camellia.decrypt(text)
+    
 # Caesar Cipher
 def caesar_cipher(text, shift, mode='encrypt'):
-    result = ""
-    for i in range(len(text)):
-        char = text[i]
-        if mode == 'encrypt':
-            if char.isupper():
-                result += chr((ord(char) + shift - 65) % 26 + 65)
-            else:
-                result += chr((ord(char) + shift - 97) % 26 + 97)
-        elif mode == 'decrypt':
-            if char.isupper():
-                result += chr((ord(char) - shift - 65) % 26 + 65)
-            else:
-                result += chr((ord(char) - shift - 97) % 26 + 97)
-    return result
-
-# RSA Encryption/Decryption
-def rsa_encryption(text, mode='encrypt'):
-    key = RSA.generate(2048)
-    private_key = key.export_key()
-    public_key = key.publickey().export_key()
-
+    ce = CaesarEncryptor()
     if mode == 'encrypt':
-        encryptor = RSA.import_key(public_key)
-        encrypted = encryptor.encrypt(text.encode())
-        return base64.b64encode(encrypted).decode()
+        return ce.encrypt(text, shift)
     elif mode == 'decrypt':
-        decryptor = RSA.import_key(private_key)
-        decrypted = decryptor.decrypt(base64.b64decode(text))
-        return decrypted.decode()
+        return ce.decrypt(text, shift)
+
+# RSA
+def rsa_encryption(text, mode='encrypt'):
+    if mode == 'encrypt':
+        public_key, private_key = RSAEncryptor.generate_key_pair()
+        print("Generated private key in secrets file.")
+        save_key_to_file(private_key)
+        return RSAEncryptor.encrypt(text, public_key)
+    elif mode == 'decrypt':
+        private_key = load_key_from_file()
+        plaintext = RSAEncryptor.decrypt(text, private_key)
+        return plaintext
+
+# RSA Helper functions
+def save_key_to_file(key):
+    with open("secrets", 'wb') as f:
+        f.write(key.save_pkcs1('PEM'))
+
+def load_key_from_file():
+    with open("secrets", 'rb') as f:
+        return rsa.PrivateKey.load_pkcs1(f.read(), format='PEM')
 
 # Main Function
 def main():
-    choice = input("Choose encryption method (Caesar, RSA, DES, CAST5, ChaCha20, TwoFish, DSA): ").lower()
+    choice = input("Choose encryption method (Caesar, RSA, DES, AES, Camellia, CAST5, ChaCha20, TwoFish, DSA): ").lower()
 
-    if(choice == 'dsa'):
+    if(choice == 'dsa' or choice == 'ecc'):
         mode = input("Choose mode (sign/verify): ").lower()
     else:
         mode = input("Choose mode (encrypt/decrypt): ").lower()
@@ -131,6 +181,10 @@ def main():
         result = rsa_encryption(text, mode)
     elif choice == 'des':
         result = des_encryption(text, mode)
+    elif choice == 'aes':
+        result = aes_encryption(text, mode)
+    elif choice == 'camellia':
+        result = camellia_encryption(text, mode)
     elif choice == 'twofish':
         result = twofish_encryption(text, mode)
     elif choice == 'chacha20':
@@ -139,6 +193,8 @@ def main():
         result = cast_encryption(text, mode)
     elif choice == 'dsa':
         result = dsa_signing(text, mode)
+    elif choice == 'ecc':
+        result = ecc_operations(text, mode)
     
     print(f"Result: {result}")
 
