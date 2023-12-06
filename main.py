@@ -151,11 +151,20 @@ def caesar_cipher(text, shift, mode='encrypt'):
         return ce.decrypt(text, shift)
 
 # RSA
-def rsa_encryption(text, mode='encrypt'):
+def rsa_encryption(text, public_key = None, mode='encrypt'):
+    padding_start = '-----BEGIN RSA PUBLIC KEY-----'
+    padding_end = '-----END RSA PUBLIC KEY-----'
     if mode == 'encrypt':
-        public_key, private_key = RSAEncryptor.generate_key_pair()
-        save_key_to_file(private_key)
-        return RSAEncryptor.encrypt(text, public_key), "Generated private key in secrets file."
+        if not public_key:
+            public_key, private_key = RSAEncryptor.generate_key_pair()
+            save_key_to_file(private_key)
+            public_key_string = public_key.save_pkcs1('PEM').decode('utf-8').replace(padding_start, '').replace(padding_end, '')
+        else:
+            public_key_string = public_key
+            public_key = padding_start + public_key + padding_end
+            public_key = rsa.PublicKey.load_pkcs1(public_key.encode('utf-8'), format='PEM')
+            
+        return RSAEncryptor.encrypt(text, public_key), public_key_string
     elif mode == 'decrypt':
         private_key = load_key_from_file()
         plaintext = RSAEncryptor.decrypt(text, private_key)

@@ -39,7 +39,7 @@ class EncryptionApp:
         self.mode_var = tk.StringVar()
         self.modes = ['encrypt', 'decrypt']
         default_mode = self.modes[0]
-        ttk.Label(frame, text=default_mode).grid(column=0, row=1, sticky=tk.W)
+        ttk.Label(frame, text="Mode:").grid(column=0, row=1, sticky=tk.W)
         self.mode_menu = ttk.Combobox(frame, textvariable=self.mode_var, values=self.modes, state='readonly', width=20)
         self.mode_menu.grid(column=1, row=1, sticky=tk.W)
         self.mode_var.set(default_mode)
@@ -110,7 +110,8 @@ class EncryptionApp:
                 result = caesar_cipher(text, shift, mode)
                 key_result = shift
             elif method == 'rsa':
-                result, key_result = rsa_encryption(text, mode)
+                result, key_result = rsa_encryption(text, key, mode)
+                print('key result: ', key_result)
             elif method == 'des':
                 result, key_result = des_encryption(text, key, mode)
             elif method == 'aes':
