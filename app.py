@@ -126,7 +126,6 @@ class EncryptionApp:
                 key_result = shift
             elif method == 'rsa':
                 result, key_result = rsa_encryption(text, key, mode)
-                print('key result: ', key_result)
             elif method == 'des':
                 result, key_result = des_encryption(text, key, mode)
             elif method == 'aes':
