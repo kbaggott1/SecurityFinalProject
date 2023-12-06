@@ -156,13 +156,12 @@ def caesar_cipher(text, shift, mode='encrypt'):
 def rsa_encryption(text, mode='encrypt'):
     if mode == 'encrypt':
         public_key, private_key = RSAEncryptor.generate_key_pair()
-        print("Generated private key in secrets file.")
         save_key_to_file(private_key)
-        return RSAEncryptor.encrypt(text, public_key)
+        return RSAEncryptor.encrypt(text, public_key), "Generated private key in secrets file."
     elif mode == 'decrypt':
         private_key = load_key_from_file()
         plaintext = RSAEncryptor.decrypt(text, private_key)
-        return plaintext
+        return plaintext, None
 
 # RSA Helper functions
 def save_key_to_file(key):
@@ -183,7 +182,7 @@ def main():
  |_____/ \___|\___|\__,_|_|  |_|\__|\__, |
                                      __/ |
                                     |___/ """)
-    choice = input("Choose encryption method (Caesar, RSA, DES, AES, Blowfish, CAST5, ChaCha20, TwoFish, DSA): ").lower()
+    choice = input("Choose encryption method (Caesar, RSA, DES, AES, Blowfish, CAST5, ChaCha20, TwoFish, DSA, ECC): ").lower()
 
     if(choice == 'dsa' or choice == 'ecc'):
         mode = input("Choose mode (sign/verify): ").lower()
