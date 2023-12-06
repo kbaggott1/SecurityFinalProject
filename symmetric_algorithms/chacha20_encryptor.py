@@ -21,8 +21,10 @@ class ChaCha20Encryptor:
     def encrypt(self, text):
         padded_text = ChaCha20Encryptor.__pad_text(text)
         ciphertext = self.chacha20.encrypt(padded_text)
+        cipher_string = base64.b64encode(ciphertext).decode('utf-8')
+        nonce_as_string = base64.b64encode(self.chacha20.nonce).decode('utf-8')
 
-        return "Encrypted text: " + base64.b64encode(ciphertext).decode('utf-8') + " Nonce: " + base64.b64encode(self.chacha20.nonce).decode('utf-8')
+        return cipher_string, nonce_as_string
 
     def decrypt(self, text): 
         ciphertext = base64.b64decode(text.encode('utf-8'))

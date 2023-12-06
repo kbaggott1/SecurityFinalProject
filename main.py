@@ -72,19 +72,21 @@ def cast_encryption(text, key = None, mode='encrypt'):
         return cast.decrypt(text), None
 
 #ChaCha20
-def chacha20_encryption(text, key = None, mode='encrypt'):
+def chacha20_encryption(text, key = None, nonce = None, mode='encrypt'):
     if mode == 'encrypt':
         key = KeyGenerator.generate_key(256)
         key_as_string = base64.b64encode(key).decode()
         print("Generated key: " + key_as_string)
         chacha20 = ChaCha20Encryptor(key)
-        return chacha20.encrypt(text), key_as_string
+        encrypted_text, nonce = chacha20.encrypt(text)
+
+        return encrypted_text, key_as_string, nonce
     
     elif mode == 'decrypt':
-        key = base64.b64decode(input("Please enter key to decrypt: ").encode())
-        nonce = base64.b64decode(input("Please enter nonce to decrypt: ").encode())
+        key = base64.b64decode(key.encode())
+        nonce = base64.b64decode(nonce.encode())
         chacha20 = ChaCha20Encryptor(key, nonce)
-        return chacha20.decrypt(text)
+        return chacha20.decrypt(text), None, nonce
 
 #TwoFish
 def twofish_encryption(text, key = None, mode='encrypt'):
