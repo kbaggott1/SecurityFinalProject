@@ -110,7 +110,7 @@ class EncryptionApp:
                 result = caesar_cipher(text, shift, mode)
                 key_result = shift
             elif method == 'rsa':
-                result = rsa_encryption(text, mode)
+                result, key_result = rsa_encryption(text, mode)
             elif method == 'des':
                 result, key_result = des_encryption(text, key, mode)
             elif method == 'aes':
