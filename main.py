@@ -84,8 +84,8 @@ def chacha20_encryption(text, key = None, nonce = None, mode='encrypt'):
     
     elif mode == 'decrypt':
         key = base64.b64decode(key.encode())
-        nonce = base64.b64decode(nonce.encode())
-        chacha20 = ChaCha20Encryptor(key, nonce)
+        nonce_decoded = base64.b64decode(nonce.encode())
+        chacha20 = ChaCha20Encryptor(key, nonce_decoded)
         return chacha20.decrypt(text), None, nonce
 
 #TwoFish
